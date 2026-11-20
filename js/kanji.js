@@ -62,5 +62,8 @@ export function etatKanji(lecons, prog, dejaMontres = []) {
   }
   const pool = [...appris].map(k => ({ k, poids: poids[k] || 1 }));
   for (const k of dejaMontres) if (fiches[k] && !appris.has(k)) pool.push({ k, poids: 2 });
-  return { niveau, candidats, pool, fiches };
+  // Tous les kanji du niveau en cours (appris ou non), dans l'ordre du cours : pour choisir soi-même ceux du widget.
+  const duNiveau = [];
+  for (const l of lecons) if (l.niveau === niveau) for (const f of l.fiches) if (!duNiveau.includes(f.k)) duNiveau.push(f.k);
+  return { niveau, candidats, pool, fiches, duNiveau, appris };
 }

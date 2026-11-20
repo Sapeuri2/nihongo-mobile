@@ -45,8 +45,15 @@ public class KanjiWidget extends AppWidgetProvider {
 
     public static void rafraichir(Context ctx) {
         AppWidgetManager m = AppWidgetManager.getInstance(ctx);
-        int[] ids = m.getAppWidgetIds(new ComponentName(ctx, KanjiWidget.class));
-        if (ids.length > 0) new KanjiWidget().onUpdate(ctx, m, ids);
+        for (KanjiWidget w : new KanjiWidget[] { new KanjiWidget(), new KanjiWidgetPetit() }) {
+            int[] ids = m.getAppWidgetIds(new ComponentName(ctx, w.getClass()));
+            if (ids.length > 0) w.onUpdate(ctx, m, ids);
+        }
+    }
+
+    /** Mise en page : le grand widget (4 kanji en ligne) ; le petit la remplace (2 × 2). */
+    protected int layout() {
+        return R.layout.widget_kanji;
     }
 
     /** Jour du widget : avant 6 h, c'est encore la veille. */
@@ -56,7 +63,7 @@ public class KanjiWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context ctx, AppWidgetManager m, int[] ids) {
-        for (int id : ids) m.updateAppWidget(id, vue(ctx));
+        for (int id : ids) m.updateAppWidget(id, vue(ctx, layout()));
         programmer(ctx);
     }
 
@@ -66,22 +73,25 @@ public class KanjiWidget extends AppWidgetProvider {
     }
 
     /** Réveil vers 6 h pour changer de jour (pas besoin d'alarme exacte : quelques minutes près suffisent). */
-    private static void programmer(Context ctx) {
+    private void programmer(Context ctx) {
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
-        Intent i = new Intent(ctx, KanjiWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        int[] ids = AppWidgetManager.getInstance(ctx).getAppWidgetIds(new ComponentName(ctx, KanjiWidget.class));
+        Intent i = new Intent(ctx, getClass()).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        int[] ids = AppWidgetManager.getInstance(ctx).getAppWidgetIds(new ComponentName(ctx, getClass()));
         i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        PendingIntent pi = PendingIntent.getBroadcast(ctx, 6, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        int code = this instanceof KanjiWidgetPetit ? 7 : 6;
+        PendingIntent pi = PendingIntent.getBroadcast(ctx, code, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         LocalDateTime prochain = LocalDate.now().atTime(HEURE, 1);
         if (!prochain.isAfter(LocalDateTime.now())) prochain = prochain.plusDays(1);
         long t = prochain.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         am.setWindow(AlarmManager.RTC, t, 15 * 60 * 1000L, pi);
     }
 
-    private static RemoteViews vue(Context ctx) {
-        RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_kanji);
+    private static RemoteViews vue(Context ctx, int layout) {
+        RemoteViews v = new RemoteViews(ctx.getPackageName(), layout);
         v.setOnClickPendingIntent(R.id.racine, ouvrir(ctx, MainActivity.ACCUEIL, 100));
+        // Mélanger : ouvre l'accueil qui tire 3 autres kanji (le lot garde sa date de fin).
+        v.setOnClickPendingIntent(R.id.melanger, ouvrir(ctx, MainActivity.ACCUEIL + "#/melanger", 110));
         String jour = jourDuWidget();
         LocalDate d = LocalDate.parse(jour);
         v.setTextViewText(R.id.date, d.getDayOfMonth() + " " + d.getMonth().getDisplayName(TextStyle.SHORT, Locale.FRENCH));

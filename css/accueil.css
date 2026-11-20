@@ -61,3 +61,19 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--quai); outline-of
 .ligne > b { color: var(--c); font-variant-numeric: tabular-nums; font-size: 16px; }
 .ligne .n { display: block; font-weight: 700; }
 .ligne .d { display: block; color: var(--muted); font-size: 13px; }
+
+/* Mélanger / choisir les kanji du widget. */
+.outils { display: flex; gap: 8px; }
+.btn-sec { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); color: var(--text); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+.btn-sec svg { color: var(--quai); flex: none; }
+.tete { display: flex; align-items: center; gap: 4px; }
+.retour { width: 48px; height: 48px; display: grid; place-items: center; margin-left: -12px; color: var(--text); }
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; padding-bottom: 80px; }
+.choix { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 92px; padding: 8px 2px; background: var(--card); border: 1px solid var(--line); border-radius: 4px; color: var(--text); font: inherit; cursor: pointer; }
+.choix .c { font-size: 30px; line-height: 1.15; color: var(--kanji); }
+.choix .s { font-size: 12px; line-height: 1.2; color: var(--muted); overflow-wrap: break-word; hyphens: auto; max-width: 100%; }
+.choix.appris .c { color: var(--text); }
+.choix.on { border: 2px solid var(--quai); background: var(--billet); }
+.valider { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px max(10px, env(safe-area-inset-bottom)); background: var(--bg); border-top: 1px solid var(--line); }
+.valider .btn { max-width: 528px; margin: 0 auto; width: 100%; border: 0; font: inherit; font-weight: 700; cursor: pointer; }
+.valider .btn:disabled { opacity: .5; cursor: default; }

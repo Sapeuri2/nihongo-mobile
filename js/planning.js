@@ -91,3 +91,28 @@ export function jours(etat, aujourdHui) {
   }
   return out;
 }
+
+// Remplace les nouveaux kanji du lot affiché ce jour-là (mélange ou choix de l'utilisateur). Le lot garde sa date de
+// début : il part toujours au bout de ses 2 jours. Les kanji retirés ne comptent pas comme vus (ils pourront revenir).
+// Sans lot ce jour-là, un lot commence aujourd'hui. Les lots futurs seront recalculés par planifier().
+export function remplacerLot(etat, jour, kanji) {
+  const lots = (etat?.lots || []).filter(l => l.debut <= jour).map(l => ({ ...l }));
+  const lot = lotDuJour(lots, jour);
+  if (lot) Object.assign(lot, { kanji: [...kanji], perso: true });
+  else lots.push({ debut: jour, kanji: [...kanji], perso: true });
+  // Un rappel qui tombe sur un kanji choisi est retiré : planifier() en tirera un autre.
+  const rappels = Object.fromEntries(Object.entries(etat?.rappels || {}).filter(([j, k]) => !(j >= jour && kanji.includes(k))));
+  return { lots, rappels };
+}
+
+// Kanji disponibles pour un mélange : pas encore appris, jamais montrés dans un autre lot passé, pas déjà affichés.
+export function tirerNouveaux(etat, jour, candidats, n = PAR_LOT, alea = Math.random) {
+  const actuel = lotDuJour(etat?.lots || [], jour);
+  const pris = new Set((etat?.lots || []).filter(l => l.debut <= jour).flatMap(l => l.kanji));
+  const libres = candidats.filter(k => !pris.has(k));
+  const out = [];
+  while (out.length < n && libres.length) out.push(libres.splice(Math.floor(alea() * libres.length), 1)[0]);
+  // Pas assez de kanji neufs : on complète avec ceux du lot actuel.
+  for (const k of actuel?.kanji || []) if (out.length < n && !out.includes(k)) out.push(k);
+  return out;
+}

@@ -1,7 +1,7 @@
 // Accueil de l'appli mobile (et page web sapeuri2.github.io/nihongo-mobile/) : les 4 applis, et les kanji du jour.
 // Dans l'appli Android, il envoie au widget le planning d'un mois (window.NihongoAndroid, fourni par l'appli).
 
-import { jourDe, jours, planifier } from './planning.js';
+import { jourDe, jours, lotDuJour, planifier, remplacerLot, tirerNouveaux } from './planning.js';
 import { chargerCours, etatKanji, progression } from './kanji.js';
 import { etatLigne, ligneAContinuer } from './lignes.js';
 
@@ -60,6 +60,24 @@ function ligneCourte(x) {
     <span class="d">${e ? `${e.niveau ? `${esc(e.niveau)} · ` : ''}${e.dues} à revoir` : 'chargement…'}</span></span><span class="d">${e ? pct(e.faites, e.total) : ''}</span></a>`;
 }
 
+const ICONE_MELANGER = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.7l2.4 4.6c1.1 1.7 2.3 2.7 4.3 2.7H21M3 17h3.5c1.2 0 2.1-.4 2.9-1.1M15.1 8.1c.8-.7 1.7-1.1 2.9-1.1H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICONE_CHOISIR = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM15 16.5l2 2 3.5-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+// Choisir soi-même les 3 nouveaux kanji du lot en cours, parmi tous ceux du niveau (appris ou non).
+function vueChoix(x) {
+  if (!x) return '<p class="muted">Chargement…</p>';
+  const n = choisis.size;
+  let h = `<header class="tete"><a class="retour" href="#/" aria-label="Retour à l'accueil"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><h1>Choisir mes kanji</h1></header>`;
+  h += `<p class="muted petit">Touche 3 kanji du ${esc(x.niveau)}. Ils restent sur le widget jusqu’au changement prévu ${x.fin ? `(le ${esc(x.fin)} à 6 h)` : ''}. Le rappel reste automatique. En vert : pas encore appris.</p>`;
+  h += `<div class="grille">${x.duNiveau.map(k => {
+    const f = x.fiches[k];
+    return `<button class="choix${choisis.has(k) ? ' on' : ''}${x.appris.has(k) ? ' appris' : ''}" data-act="cocher" data-k="${esc(k)}" aria-pressed="${choisis.has(k)}">
+      <span class="c jp" lang="ja">${esc(k)}</span><span class="s">${esc(f?.sens || '')}</span></button>`;
+  }).join('')}</div>`;
+  h += `<div class="valider"><button class="btn" data-act="valider-choix" ${n === 3 ? '' : 'disabled'}>${n === 3 ? 'Mettre ces 3 kanji sur le widget' : `Encore ${3 - n} à choisir`}</button></div>`;
+  return h;
+}
+
 function vue({ jour, fiches, aujourdhui, erreur, lignes = [] }) {
   const cont = ligneAContinuer(lignes);
   const dues = lignes.reduce((s, x) => s + (x.etat?.dues || 0), 0);
@@ -69,7 +87,11 @@ function vue({ jour, fiches, aujourdhui, erreur, lignes = [] }) {
   if (erreur) h += `<p class="muted">${esc(erreur)}</p>`;
   else if (!aujourdhui) h += '<p class="muted">Chargement…</p>';
   else if (!aujourdhui.nouveaux.length && !aujourdhui.rappel) h += '<p class="muted">Rien à afficher : ouvre l’appli Kanji une fois pour récupérer ta progression.</p>';
-  else h += `<div class="kanjis">${aujourdhui.nouveaux.map(k => carteKanji(fiches[k])).join('')}${carteKanji(fiches[aujourdhui.rappel], true)}</div>`;
+  else {
+    h += `<div class="kanjis">${aujourdhui.nouveaux.map(k => carteKanji(fiches[k])).join('')}${carteKanji(fiches[aujourdhui.rappel], true)}</div>`;
+    h += `<div class="outils"><button class="btn-sec" data-act="melanger">${ICONE_MELANGER}Mélanger</button>
+      <a class="btn-sec" href="#/choisir">${ICONE_CHOISIR}Choisir mes kanji</a></div>`;
+  }
   if (!android()) h += `<p class="muted petit">Sur Android, <a href="${APK}">installe l’appli</a> pour avoir ces kanji en widget sur ton écran d’accueil.</p>`;
   h += `<div class="titre"><h2>Mes lignes</h2><span>${dues ? `${dues} à revoir` : ''}</span></div>`;
   const autres = APPLIS.map(a => lignes.find(x => x.appli.id === a.id) || { appli: a }).filter(x => x !== cont);
@@ -78,18 +100,26 @@ function vue({ jour, fiches, aujourdhui, erreur, lignes = [] }) {
 }
 
 // Calcule le planning (jours passés gardés), l'enregistre, et l'envoie au widget dans l'appli Android.
-export function mettreAJour(lecons, maintenant = new Date()) {
+// remplacer : 'melanger' (3 autres au hasard) ou une liste de 3 kanji choisis ; null = simple mise à jour.
+export function mettreAJour(lecons, maintenant = new Date(), remplacer = null) {
   const jour = jourDe(maintenant);
-  const ancien = lire(CLE_WIDGET, null);
+  let ancien = lire(CLE_WIDGET, null);
   const dejaMontres = (ancien?.lots || []).filter(l => l.debut < jour).flatMap(l => l.kanji);
-  const { niveau, candidats, pool, fiches } = etatKanji(lecons, progression(), dejaMontres);
+  const { niveau, candidats, pool, fiches, duNiveau, appris } = etatKanji(lecons, progression(), dejaMontres);
+  if (remplacer) {
+    const nouveaux = remplacer === 'melanger' ? tirerNouveaux(planifier(ancien, jour, candidats, pool), jour, candidats) : remplacer;
+    ancien = remplacerLot(planifier(ancien, jour, candidats, pool), jour, nouveaux);
+  }
   const etat = planifier(ancien, jour, candidats, pool);
   ecrire(CLE_WIDGET, etat);
   const js = jours(etat, jour);
   const utiles = new Set(Object.values(js).flatMap(x => [...x.nouveaux, x.rappel]).filter(Boolean));
   const donnees = { v: 1, maj: maintenant.getTime(), niveau, jours: js, fiches: Object.fromEntries([...utiles].map(k => [k, fiches[k]])) };
   try { android()?.setWidgetKanji(JSON.stringify(donnees)); } catch { /* ancienne version de l'appli */ }
-  return { jour, fiches, niveau, aujourdhui: js[jour] };
+  const lot = lotDuJour(etat.lots, jour);
+  const fin = lot ? new Date(`${lot.debut}T12:00:00`) : null;
+  if (fin) fin.setDate(fin.getDate() + 2);
+  return { jour, fiches, niveau, duNiveau, appris, aujourdhui: js[jour], fin: fin ? fin.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '' };
 }
 
 let lignes = [];
@@ -100,20 +130,59 @@ async function chargerLignes() {
   return lignes;
 }
 
-async function main() {
+let kanji = null;
+let dernier = null;
+const choisis = new Set();
+
+function afficher() {
   const app = document.getElementById('app');
-  app.innerHTML = vue({ jour: jourDe(), lignes });
+  if (location.hash === '#/choisir') app.innerHTML = vueChoix(dernier);
+  else app.innerHTML = dernier ? vue({ ...dernier, lignes }) : vue({ jour: jourDe(), lignes, erreur: erreurChargement });
+}
+
+let erreurChargement = '';
+async function main() {
+  afficher();
   try {
     await chargerLignes();
-    const kanji = lignes.find(x => x.appli.id === 'kanji')?.lecons;
+    kanji = lignes.find(x => x.appli.id === 'kanji')?.lecons;
     if (!kanji) throw new Error('contenu Kanji introuvable');
-    app.innerHTML = vue({ ...mettreAJour(kanji), lignes });
+    // Bouton « mélanger » du widget : l'appli s'ouvre sur #/melanger, on mélange puis on revient à l'accueil.
+    const viaWidget = location.hash === '#/melanger';
+    dernier = mettreAJour(kanji, new Date(), viaWidget ? 'melanger' : null);
+    if (viaWidget) history.replaceState(null, '', '#/');
   } catch (e) {
-    app.innerHTML = vue({ jour: jourDe(), erreur: `Impossible de lire les kanji (${e.message}). Hors ligne ?`, lignes });
+    erreurChargement = `Impossible de lire les kanji (${e.message}). Hors ligne ?`;
   }
+  afficher();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled || !kanji) return;
+  const act = el.dataset.act;
+  if (act === 'melanger') { dernier = mettreAJour(kanji, new Date(), 'melanger'); afficher(); }
+  if (act === 'cocher') {
+    const k = el.dataset.k;
+    if (choisis.has(k)) choisis.delete(k); else if (choisis.size < 3) choisis.add(k);
+    const y = window.scrollY; afficher(); window.scrollTo(0, y);
+  }
+  if (act === 'valider-choix' && choisis.size === 3) { dernier = mettreAJour(kanji, new Date(), [...choisis]); choisis.clear(); location.hash = '#/'; }
+});
+
+window.addEventListener('hashchange', () => {
+  // Bouton « mélanger » du widget alors que l'accueil est déjà ouvert.
+  if (location.hash === '#/melanger') {
+    if (kanji) dernier = mettreAJour(kanji, new Date(), 'melanger');
+    history.replaceState(null, '', '#/');
+  }
+  if (location.hash === '#/choisir') { choisis.clear(); (dernier?.aujourdhui?.nouveaux || []).forEach(k => choisis.add(k)); }
+  afficher();
+  window.scrollTo(0, 0);
+});
+
 // Quand on revient sur l'accueil (retour arrière depuis une appli), on recalcule : une leçon a pu être faite.
 window.addEventListener('pageshow', e => { if (e.persisted) main(); });
+if (location.hash === '#/choisir') location.hash = '#/';
 main();

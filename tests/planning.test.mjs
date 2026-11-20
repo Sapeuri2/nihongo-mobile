@@ -54,3 +54,23 @@ test('plus de nouveaux kanji : seulement des rappels ; pas de kanji vus : seulem
   const j2 = jours(planifier(null, '2026-11-21', candidats, []), '2026-11-21');
   assert.equal(j2['2026-11-21'].rappel, null);
 });
+
+import { remplacerLot, tirerNouveaux, lotDuJour } from '../js/planning.js';
+test('mélanger / choisir : le lot change, sa date de fin ne bouge pas, les kanji retirés pourront revenir', () => {
+  const e1 = planifier(null, '2026-11-21', candidats, pool);
+  const nouveaux = tirerNouveaux(e1, '2026-11-22', candidats, 3, () => 0);
+  assert.equal(nouveaux.length, 3);
+  assert.ok(nouveaux.every(k => !'教習勉'.includes(k)), 'mélange : 3 autres kanji');
+  const e2 = planifier(remplacerLot(e1, '2026-11-22', nouveaux), '2026-11-22', candidats, pool);
+  const lot = lotDuJour(e2.lots, '2026-11-22');
+  assert.equal(lot.debut, '2026-11-21', 'même date de début : le lot part toujours le 23');
+  assert.deepEqual(lot.kanji, nouveaux);
+  const j = jours(e2, '2026-11-22');
+  assert.ok(!j['2026-11-22'].nouveaux.includes(j['2026-11-22'].rappel), 'le rappel n\'est pas un des kanji choisis');
+  const plusTard = e2.lots.filter(l => l.debut > '2026-11-22').flatMap(l => l.kanji);
+  assert.ok(plusTard.includes('教'), 'un kanji retiré revient dans un lot suivant');
+  assert.ok(!plusTard.some(k => nouveaux.includes(k)), 'les kanji choisis ne reviennent pas en double');
+  const choix = remplacerLot(e2, '2026-11-22', [...'日本人']);
+  assert.deepEqual(lotDuJour(choix.lots, '2026-11-22').kanji, [...'日本人'], 'choix : même des kanji déjà appris');
+  assert.ok(!Object.entries(choix.rappels).some(([d, k]) => d >= '2026-11-22' && '日本人'.includes(k)));
+});

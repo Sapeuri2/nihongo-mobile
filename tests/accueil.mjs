@@ -68,6 +68,38 @@ try {
     await p.waitForSelector('.kanjis .kj');
     const k2 = await p.$$eval('.kanjis .kj .c', els => els.map(e => e.textContent));
     ok(k2.join('') === k.join(''), 'même kanji à la réouverture');
+    // Mélanger : 3 autres nouveaux, même lot (même date de fin), widget mis à jour.
+    const debut = () => p.evaluate(() => JSON.parse(localStorage.getItem('nm-widget-v1')).lots.find(l => l.perso || true).debut);
+    const avantDebut = await debut();
+    await p.click('[data-act="melanger"]');
+    const k3 = await p.$$eval('.kanjis .kj .c', els => els.map(e => e.textContent));
+    ok(k3.slice(0, 3).every(x => !k.slice(0, 3).includes(x)), `mélanger : 3 autres kanji (${k.slice(0, 3).join('')} → ${k3.slice(0, 3).join('')})`);
+    ok(await debut() === avantDebut, 'mélanger : la date du lot ne change pas');
+    const w2 = await p.evaluate(() => window.__widget.at(-1));
+    ok(w2.jours[Object.keys(w2.jours)[0]].nouveaux.join('') === k3.slice(0, 3).join(''), 'mélanger : widget mis à jour');
+    // Choisir : 3 kanji du niveau, dont un déjà appris.
+    await p.click('a[href="#/choisir"]');
+    await p.waitForSelector('.grille .choix');
+    ok(await p.$eval('[data-act="valider-choix"]', b => !b.disabled), 'choisir : le lot actuel est pré-coché (3)');
+    for (const x of k3.slice(0, 3)) await p.click(`.choix[data-k="${x}"]`);
+    const voulus = ['町', '村', '市'];
+    for (const x of voulus) await p.click(`.choix[data-k="${x}"]`);
+    if (process.env.CAPTURES) await p.screenshot({ path: join(process.env.CAPTURES, `choisir-${largeur}.png`) });
+    const dch = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    ok(dch <= 0, `débordement de ${dch}px à ${largeur}px (choisir)`);
+    await p.click('[data-act="valider-choix"]');
+    await p.waitForSelector('.kanjis .kj');
+    const k4 = await p.$$eval('.kanjis .kj .c', els => els.map(e => e.textContent));
+    ok(k4.slice(0, 3).join('') === voulus.join(''), `choisir : les 3 kanji choisis sont affichés (${k4.join('')})`);
+    ok(!voulus.includes(k4[3]), 'choisir : le rappel reste automatique et différent');
+    ok(await debut() === avantDebut, 'choisir : la date du lot ne change pas');
+    ok((await p.evaluate(() => window.__widget.at(-1))).fiches['町'], 'choisir : widget mis à jour');
+    // Bouton « mélanger » du widget : l'appli ouvre l'accueil sur #/melanger.
+    await p.evaluate(() => { location.hash = '#/melanger'; });
+    await p.waitForFunction(() => location.hash === '#/');
+    const k5 = await p.$$eval('.kanjis .kj .c', els => els.map(e => e.textContent));
+    ok(k5.slice(0, 3).join('') !== voulus.join(''), `bouton du widget : mélangé (${k5.join('')})`);
+    ok(await debut() === avantDebut, 'bouton du widget : la date du lot ne change pas');
     const d = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     ok(d <= 0, `débordement de ${d}px à ${largeur}px`);
     if (process.env.CAPTURES) await p.screenshot({ path: join(process.env.CAPTURES, `accueil-${largeur}.png`), fullPage: true });
