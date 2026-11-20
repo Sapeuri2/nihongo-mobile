@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/racine"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_fond"
+    android:orientation="vertical"
+    android:padding="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal"
+        android:layout_marginBottom="6dp" android:gravity="center_vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="漢字"
+            android:textColor="@color/kanji" android:textSize="13sp" android:textStyle="bold" />
+        <TextView android:id="@+id/date" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+            android:layout_marginStart="8dp" android:textColor="@color/muted" android:textSize="12sp" />
+        <TextView android:id="@+id/etiquette_rappel" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="+ rappel" android:textColor="@color/muted" android:textSize="11sp" />
+    </LinearLayout>
+    <TextView android:id="@+id/vide" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:gravity="center" android:text="@string/widget_vide" android:textColor="@color/muted"
+        android:textSize="13sp" android:visibility="gone" />
+    <LinearLayout
+        android:id="@+id/cases"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+        <LinearLayout
+            android:id="@+id/case0"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/case_fond"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="4dp">
+            <TextView android:id="@+id/k0" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/kanji" android:textSize="32sp" android:includeFontPadding="false" />
+            <TextView android:id="@+id/lect0" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/muted" android:textSize="11sp" />
+            <TextView android:id="@+id/sens0" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/texte" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/case1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/case_fond"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="4dp">
+            <TextView android:id="@+id/k1" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/kanji" android:textSize="32sp" android:includeFontPadding="false" />
+            <TextView android:id="@+id/lect1" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/muted" android:textSize="11sp" />
+            <TextView android:id="@+id/sens1" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/texte" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/case2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/case_fond"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="4dp">
+            <TextView android:id="@+id/k2" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/kanji" android:textSize="32sp" android:includeFontPadding="false" />
+            <TextView android:id="@+id/lect2" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/muted" android:textSize="11sp" />
+            <TextView android:id="@+id/sens2" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/texte" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/case3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/case_rappel"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="4dp">
+            <TextView android:id="@+id/k3" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/texte" android:textSize="32sp" android:includeFontPadding="false" />
+            <TextView android:id="@+id/lect3" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/muted" android:textSize="11sp" />
+            <TextView android:id="@+id/sens3" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:maxLines="2" android:ellipsize="end"
+                android:textColor="@color/texte" android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,8 @@
+<resources>
+    <color name="fond">#16171B</color>
+    <color name="widget_fond">#212227</color>
+    <color name="case_fond">#16171B</color>
+    <color name="texte">#ECEBE8</color>
+    <color name="muted">#9B948C</color>
+    <color name="kanji">#5FBF8F</color>
+</resources>

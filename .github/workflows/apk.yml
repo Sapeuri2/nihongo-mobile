@@ -1,0 +1,31 @@
+# Construit l'appli Android à chaque push sur main et la publie au même lien :
+# https://github.com/Sapeuri2/nihongo-mobile/releases/download/apk/nihongo.apk
+name: APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Tests du planning
+        run: node --test tests/*.test.mjs
+      - name: Construire l'APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon --console=plain
+      - name: Publier (même lien à chaque fois)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk nihongo.apk
+          gh release view apk >/dev/null 2>&1 || gh release create apk --title "Appli Android" --notes "Dernière version de l'appli Nihongo. Télécharge nihongo.apk sur ton téléphone et ouvre-le pour l'installer."
+          gh release upload apk nihongo.apk --clobber
+          gh release edit apk --notes "Dernière version : 1.${GITHUB_RUN_NUMBER} ($(date -u +%Y-%m-%d)). Télécharge nihongo.apk sur ton téléphone et ouvre-le pour l'installer (par-dessus l'ancienne : ta progression est gardée)."

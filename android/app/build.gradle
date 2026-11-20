@@ -1,0 +1,28 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'io.github.sapeuri2.nihongo'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'io.github.sapeuri2.nihongo'
+        minSdk 26
+        targetSdk 35
+        // Numéro de version : celui de la construction GitHub (chaque APK remplace le précédent sans tout effacer).
+        versionCode Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
+        versionName "1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+    // Toujours la même signature : une nouvelle version s'installe par-dessus l'ancienne (progression gardée).
+    signingConfigs {
+        nihongo {
+            storeFile file('nihongo.keystore')
+            storePassword 'nihongo-perso'
+            keyAlias 'nihongo'
+            keyPassword 'nihongo-perso'
+        }
+    }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.nihongo }
+        debug { signingConfig signingConfigs.nihongo }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Nihongo</string>
+    <string name="widget_kanji">Kanji du jour</string>
+    <string name="widget_kanji_desc">3 nouveaux kanji pendant 2 jours et 1 rappel, chaque matin à 6 h</string>
+    <string name="widget_vide">Ouvre l’appli une fois pour préparer tes kanji.</string>
+</resources>

@@ -1,0 +1,27 @@
+/* Accueil (étape 1 : simple ; le nouveau design viendra à l'étape 2). */
+:root { --bg: #f6f3ee; --carte: #fff; --texte: #22201c; --muted: #77716a; --ligne: #e6e0d6; --kanji: #2e7d5b; --gram: #b23a48; --voc: #2a5fa8; --exo: #6b3fb5; }
+@media (prefers-color-scheme: dark) { :root { --bg: #16171b; --carte: #212227; --texte: #ecebe8; --muted: #9b948c; --ligne: #33343a; --kanji: #5fbf8f; --gram: #e0707e; --voc: #74a2e8; --exo: #a98be6; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--texte); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 640px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px 32px; }
+.jp { font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif; }
+.tete h1 { font-size: 1.4rem; margin: 8px 0 16px; }
+.muted { color: var(--muted); }
+.petit { font-size: .85rem; }
+a { color: inherit; }
+.carte { background: var(--carte); border: 1px solid var(--ligne); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+.titre { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.titre h2 { margin: 0; font-size: 1.1rem; }
+.kanjis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0 6px; }
+.kj { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; padding: 10px 4px 8px; border-radius: 12px; background: var(--bg); min-width: 0; }
+.kj .k { font-size: 2.4rem; line-height: 1.15; color: var(--kanji); }
+.kj .lect { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
+.kj .sens { font-size: .78rem; overflow-wrap: anywhere; }
+.kj.rappel { outline: 1.5px dashed var(--ligne); }
+.kj.rappel .k { color: var(--texte); }
+.etiquette { position: absolute; top: -8px; font-size: .65rem; background: var(--carte); border: 1px solid var(--ligne); border-radius: 8px; padding: 0 6px; color: var(--muted); }
+.applis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.appli { display: flex; flex-direction: column; gap: 2px; padding: 16px; border-radius: 16px; background: var(--carte); border: 1px solid var(--ligne); text-decoration: none; }
+.appli .jp { font-size: 1.6rem; }
+.appli .nom { font-weight: 600; }
+.appli.grammaire .jp { color: var(--gram); } .appli.vocabulaire .jp { color: var(--voc); } .appli.kanji .jp { color: var(--kanji); } .appli.exo .jp { color: var(--exo); }
