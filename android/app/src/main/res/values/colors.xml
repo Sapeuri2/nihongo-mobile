@@ -1,8 +1,11 @@
 <resources>
-    <color name="fond">#F6F3EE</color>
-    <color name="widget_fond">#FFFFFF</color>
-    <color name="case_fond">#F6F3EE</color>
-    <color name="texte">#22201C</color>
-    <color name="muted">#77716A</color>
+    <!-- Monde « billet de train » : fond de quai, papier de billet, encre bleu-noir, orange de quai. -->
+    <color name="fond">#E9ECEF</color>
+    <color name="widget_fond">#F6E9DF</color>
+    <color name="case_fond">#FFFFFF</color>
+    <color name="texte">#1D2A44</color>
+    <color name="muted">#5A6378</color>
     <color name="kanji">#2E7D5B</color>
+    <color name="quai">#E0662B</color>
+    <color name="cadre">#C9B3A3</color>
 </resources>

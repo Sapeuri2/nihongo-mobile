@@ -1,27 +1,63 @@
-/* Accueil (étape 1 : simple ; le nouveau design viendra à l'étape 2). */
-:root { --bg: #f6f3ee; --carte: #fff; --texte: #22201c; --muted: #77716a; --ligne: #e6e0d6; --kanji: #2e7d5b; --gram: #b23a48; --voc: #2a5fa8; --exo: #6b3fb5; }
-@media (prefers-color-scheme: dark) { :root { --bg: #16171b; --carte: #212227; --texte: #ecebe8; --muted: #9b948c; --ligne: #33343a; --kanji: #5fbf8f; --gram: #e0707e; --voc: #74a2e8; --exo: #a98be6; } }
+/* Accueil — monde « billet de train japonais » (切符) : voir .impeccable/surfaces/index-html.md. Aucune animation. */
+:root {
+  --bg: #e9ecef; --card: #ffffff; --text: #1d2a44; --muted: #5a6378; --line: #d5dae1;
+  --billet: #f6e9df; --trame: #ecd8ca; --cadre: #c9b3a3; --quai: #e0662b;
+  --gram: #b23a48; --voc: #2a5fa8; --kanji: #2e7d5b; --exo: #6b3fb5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10151d; --card: #182029; --text: #e6eaf0; --muted: #a3adbd; --line: #2b3644;
+    --billet: #2a221d; --trame: #33291f; --cadre: #5a4637; --quai: #f08a55;
+    --gram: #e0707e; --voc: #74a2e8; --kanji: #5fbf8f; --exo: #a98be6;
+  }
+}
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--texte); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-main { max-width: 640px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px 32px; }
-.jp { font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif; }
-.tete h1 { font-size: 1.4rem; margin: 8px 0 16px; }
-.muted { color: var(--muted); }
-.petit { font-size: .85rem; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 Roboto, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; }
+::selection { background: var(--billet); color: var(--text); }
+main { max-width: 560px; margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) 16px 32px; display: grid; gap: 12px; }
+.jp { font-family: "Noto Sans JP", "Noto Sans CJK JP", "Hiragino Sans", "Yu Gothic", sans-serif; }
 a { color: inherit; }
-.carte { background: var(--carte); border: 1px solid var(--ligne); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-.titre { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.titre h2 { margin: 0; font-size: 1.1rem; }
-.kanjis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0 6px; }
-.kj { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; padding: 10px 4px 8px; border-radius: 12px; background: var(--bg); min-width: 0; }
-.kj .k { font-size: 2.4rem; line-height: 1.15; color: var(--kanji); }
-.kj .lect { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
-.kj .sens { font-size: .78rem; overflow-wrap: anywhere; }
-.kj.rappel { outline: 1.5px dashed var(--ligne); }
-.kj.rappel .k { color: var(--texte); }
-.etiquette { position: absolute; top: -8px; font-size: .65rem; background: var(--carte); border: 1px solid var(--ligne); border-radius: 8px; padding: 0 6px; color: var(--muted); }
-.applis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.appli { display: flex; flex-direction: column; gap: 2px; padding: 16px; border-radius: 16px; background: var(--carte); border: 1px solid var(--ligne); text-decoration: none; }
-.appli .jp { font-size: 1.6rem; }
-.appli .nom { font-weight: 600; }
-.appli.grammaire .jp { color: var(--gram); } .appli.vocabulaire .jp { color: var(--voc); } .appli.kanji .jp { color: var(--kanji); } .appli.exo .jp { color: var(--exo); }
+a:focus-visible, .btn:focus-visible { outline: 2px solid var(--quai); outline-offset: 2px; }
+.muted { color: var(--muted); margin: 0; }
+.petit { font-size: 13px; }
+.tete h1 { margin: 4px 4px 0; font-size: 21px; }
+
+.grammaire { --c: var(--gram); } .vocabulaire { --c: var(--voc); } .kanji { --c: var(--kanji); } .exo { --c: var(--exo); }
+
+/* Le billet du jour. */
+.billet {
+  position: relative; padding: 14px 18px 16px; border: 1px solid var(--cadre); border-radius: 4px;
+  background: var(--billet) repeating-linear-gradient(135deg, transparent 0 6px, var(--trame) 6px 7px);
+}
+.billet::before, .billet::after { content: ""; position: absolute; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--bg); border: 1px solid var(--cadre); }
+.billet::before { left: -8px; } .billet::after { right: -8px; }
+.trajet { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 10px; }
+.gare { min-width: 0; }
+.gare small { display: block; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gare b { display: block; font-size: 22px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.gare.droite { text-align: right; } .gare.droite b { color: var(--c); }
+.fleche { color: var(--quai); padding-bottom: 20px; }
+.titre-l { margin: 10px 0 0; font-weight: 700; font-size: 17px; }
+.cases { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.chiffres { display: flex; gap: 4px; }
+.chiffres span { width: 28px; height: 34px; display: grid; place-items: center; border: 1px solid var(--cadre); border-radius: 2px; background: var(--card); font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
+.cases em { font-style: normal; color: var(--muted); font-size: 13px; }
+.btn { display: flex; align-items: center; justify-content: center; min-height: 50px; margin-top: 14px; border-radius: 4px; background: var(--text); color: var(--card); font-weight: 700; letter-spacing: .02em; text-decoration: none; }
+
+.titre { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 4px -4px; }
+.titre h2 { margin: 0; font-size: 16px; } .titre span { color: var(--muted); font-size: 13px; }
+
+.kanjis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.kj { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 2px 8px; background: var(--card); border: 1px solid var(--line); border-radius: 4px; text-decoration: none; text-align: center; min-height: 118px; }
+.kj .c { font-size: 38px; line-height: 1.15; color: var(--kanji); }
+.kj .l { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.kj .s { font-size: 13px; line-height: 1.25; overflow-wrap: anywhere; }
+.kj.rappel { border: 1px dashed var(--quai); }
+.kj.rappel .c, .kj.rappel .s { color: var(--quai); }
+
+.lignes { display: grid; gap: 6px; }
+.ligne { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 56px; padding: 8px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 4px; text-decoration: none; }
+.ligne > b { color: var(--c); font-variant-numeric: tabular-nums; font-size: 16px; }
+.ligne .n { display: block; font-weight: 700; }
+.ligne .d { display: block; color: var(--muted); font-size: 13px; }

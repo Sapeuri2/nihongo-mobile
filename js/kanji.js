@@ -19,14 +19,18 @@ export function ficheDeSection(s, lecon) {
   };
 }
 
-export async function chargerKanji(base = '../nihongo-kanji/') {
+// Leçons d'une appli de cours (même adresse) : id, niveau, titre, numéro ; fiches des kanji pour l'appli Kanji.
+export async function chargerCours(base) {
   const json = async u => { const r = await fetch(new URL(u, new URL(base, location.href)), { cache: 'no-cache' }); if (!r.ok) throw new Error(`${u} : ${r.status}`); return r.json(); };
   const man = await json('data/manifest.json');
   const blocs = await Promise.all(man.blocks.map(f => json(f)));
   const lecons = [];
-  for (const b of blocs) for (const l of b.lessons) lecons.push({ id: l.id, niveau: b.level || '', titre: plain(l.title), fiches: (l.sections || []).map(s => ficheDeSection(s, l.id)).filter(Boolean) });
+  let num = 0;
+  for (const b of blocs) for (const l of b.lessons) lecons.push({ id: l.id, num: ++num, niveau: b.level || '', titre: plain(l.title), fiches: (l.sections || []).map(s => ficheDeSection(s, l.id)).filter(Boolean) });
   return lecons;
 }
+
+export const chargerKanji = (base = '../nihongo-kanji/') => chargerCours(base);
 
 export function progression(cle = CLE_KANJI) {
   try { return JSON.parse(localStorage.getItem(cle)) || {}; } catch { return {}; }

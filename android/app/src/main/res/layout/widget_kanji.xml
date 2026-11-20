@@ -91,7 +91,7 @@
             android:orientation="vertical"
             android:padding="4dp">
             <TextView android:id="@+id/k3" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="@color/texte" android:textSize="32sp" android:includeFontPadding="false" />
+                android:textColor="@color/quai" android:textSize="32sp" android:includeFontPadding="false" />
             <TextView android:id="@+id/lect3" android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:gravity="center" android:maxLines="2" android:ellipsize="end"
                 android:textColor="@color/muted" android:textSize="11sp" />
